@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amatel — Conecta e Transforma</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --blue-deep:   #020b18;
+  --blue-dark:   #0a1628;
+  --blue-mid:    #0d3a6e;
+  --blue:        #0077ff;
+  --glow:        #00aaff;
+  --white:       #ffffff;
+  --muted:       rgba(255,255,255,.6);
+}
+
+html { scroll-behavior: auto; }
+
+body {
+  background: var(--blue-deep);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 2px; }
+
+/* ── Fixed overlays ───────────────────────────── */
+#vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: 50;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.75) 100%);
+}
+
+#scanlines {
+  position: fixed; inset: 0; pointer-events: none; z-index: 49;
+  background: repeating-linear-gradient(0deg,
+    transparent, transparent 2px,
+    rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 4px);
+}
+
+/* ── Nav ──────────────────────────────────────── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.4rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(2,11,24,.9) 0%, transparent 100%);
+  backdrop-filter: blur(0px);
+}
+.nav-logo {
+  font-size: 1.5rem; font-weight: 900; color: #fff;
+  letter-spacing: .12em;
+}
+.nav-logo span { color: var(--glow); }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: .875rem; font-weight: 500;
+  transition: color .2s;
+}
+.nav-links a:hover { color: #fff; }
+.nav-cta {
+  padding: .55rem 1.4rem;
+  background: rgba(0,119,255,.15);
+  border: 1px solid rgba(0,119,255,.5);
+  color: var(--glow);
+  border-radius: 50px; font-size: .85rem; font-weight: 600;
+  text-decoration: none; transition: all .3s;
+}
+.nav-cta:hover {
+  background: var(--blue); color: #fff;
+  box-shadow: 0 0 20px rgba(0,119,255,.5);
+}
+
+/* ── Progress dots ────────────────────────────── */
+#progress {
+  position: fixed; right: 1.75rem; top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: .7rem; z-index: 100;
+}
+.pdot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  cursor: pointer;
+  transition: all .35s;
+}
+.pdot.active {
+  background: var(--glow);
+  border-color: var(--glow);
+  box-shadow: 0 0 10px var(--glow);
+  transform: scale(1.5);
+}
+
+/* ── Scene ────────────────────────────────────── */
+.scene {
+  position: relative;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+}
+
+.inner {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+}
+
+.bg {
+  position: absolute; inset: 0; z-index: 0;
+}
+.bg-0 { background: radial-gradient(ellipse at 50% 60%, #0d3a6e 0%, #020b18 65%); }
+.bg-1 { background: radial-gradient(ellipse at 35% 50%, #082040 0%, #020b18 65%); }
+.bg-2 { background: radial-gradient(ellipse at 65% 50%, #061a30 0%, #010810 65%); }
+.bg-3 { background: radial-gradient(ellipse at 50% 40%, #0b2a4a 0%, #020b18 65%); }
+.bg-4 { background: radial-gradient(ellipse at 50% 60%, #0050bb 0%, #020b18 65%); }
+
+/* grid overlay on bg */
+.bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,119,255,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,119,255,.07) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+.content {
+  position: relative; z-index: 1;
+  text-align: center; padding: 2rem;
+  max-width: 960px; width: 100%;
+}
+
+/* ── Typography ───────────────────────────────── */
+.eyebrow {
+  display: inline-block;
+  font-size: .7rem; font-weight: 600;
+  letter-spacing: .28em; text-transform: uppercase;
+  color: var(--glow); opacity: .85;
+  margin-bottom: 1.1rem;
+}
+
+h1 {
+  font-size: clamp(3.2rem, 8vw, 7rem);
+  font-weight: 900; line-height: 1; letter-spacing: -.025em;
+  color: #fff; margin-bottom: 1.4rem;
+  text-shadow: 0 0 80px rgba(0,119,255,.4);
+}
+
+h2 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -.02em;
+  color: #fff; margin-bottom: 1.4rem;
+}
+
+.accent { color: var(--glow); }
+
+.subtitle {
+  font-size: clamp(.95rem, 1.8vw, 1.2rem);
+  color: var(--muted); font-weight: 300; line-height: 1.65;
+  max-width: 560px; margin: 0 auto 2.2rem;
+}
+
+/* ── Buttons ──────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .9rem 2.2rem;
+  background: var(--blue); color: #fff;
+  font-size: .95rem; font-weight: 600;
+  border-radius: 50px; text-decoration: none; border: none;
+  cursor: pointer; letter-spacing: .04em;
+  box-shadow: 0 0 30px rgba(0,119,255,.45);
+  transition: all .3s;
+}
+.btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 50px rgba(0,119,255,.65);
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.3);
+  box-shadow: none;
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,.06);
+  box-shadow: none;
+}
+
+/* ── Stats ────────────────────────────────────── */
+.stats {
+  display: flex; gap: 3.5rem;
+  justify-content: center; margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+.stat-n {
+  font-size: 3.2rem; font-weight: 900; line-height: 1;
+  color: var(--glow);
+}
+.stat-l {
+  font-size: .7rem; color: rgba(255,255,255,.45);
+  letter-spacing: .15em; text-transform: uppercase; margin-top: .2rem;
+}
+
+/* ── Product grid ─────────────────────────────── */
+.products {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: .9rem; margin-top: 2.2rem;
+}
+@media (max-width: 700px) {
+  .products { grid-template-columns: repeat(2, 1fr); }
+  .nav-links { display: none; }
+  #nav { padding: 1rem 1.4rem; }
+}
+.pcard {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(0,119,255,.18);
+  border-radius: 14px; padding: 1.2rem .9rem;
+  text-align: center; transition: all .3s;
+}
+.pcard:hover {
+  background: rgba(0,119,255,.09);
+  border-color: rgba(0,119,255,.45);
+  transform: translateY(-5px);
+}
+.pcard-icon { font-size: 1.9rem; margin-bottom: .45rem; display: block; }
+.pcard-name {
+  font-size: .78rem; color: rgba(255,255,255,.7); font-weight: 500;
+  line-height: 1.3;
+}
+
+/* ── Brands ───────────────────────────────────── */
+.brands {
+  display: flex; flex-wrap: wrap; gap: .6rem;
+  justify-content: center; margin-top: 2rem; max-width: 780px;
+  margin-left: auto; margin-right: auto;
+}
+.btag {
+  padding: .45rem 1.1rem;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 50px;
+  font-size: .82rem; color: rgba(255,255,255,.65); font-weight: 500;
+  transition: all .3s; cursor: default;
+}
+.btag:hover {
+  background: rgba(0,119,255,.12);
+  border-color: rgba(0,119,255,.4); color: #fff;
+}
+
+/* ── CTA buttons row ──────────────────────────── */
+.btn-row {
+  display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+}
+
+/* ── Locations ────────────────────────────────── */
+.locations {
+  margin-top: 2.5rem;
+  color: rgba(255,255,255,.35);
+  font-size: .78rem; letter-spacing: .08em;
+}
+
+/* ── Scroll hint ──────────────────────────────── */
+.scroll-hint {
+  position: absolute; bottom: 2.4rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+  color: rgba(255,255,255,.3); font-size: .7rem; letter-spacing: .2em;
+  text-transform: uppercase; z-index: 2;
+  animation: bounce 2s ease-in-out infinite;
+}
+.scroll-hint::after {
+  content: '';
+  width: 1px; height: 36px;
+  background: linear-gradient(to bottom, rgba(0,170,255,.6), transparent);
+}
+@keyframes bounce {
+  0%,100% { transform: translateX(-50%) translateY(0); opacity:.3; }
+  50%      { transform: translateX(-50%) translateY(7px); opacity:.8; }
+}
+
+/* ── Particles ────────────────────────────────── */
+#particles { position: fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+.pt {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0,170,255,.7);
+  animation: drift linear infinite;
+}
+@keyframes drift {
+  0%   { opacity:0; transform:translateY(0) scale(.5); }
+  10%  { opacity:.8; }
+  90%  { opacity:.4; }
+  100% { opacity:0; transform:translateY(-100vh) scale(.2); }
+}
+
+/* ── Section 0 logo ───────────────────────────── */
+.hero-logo {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: .3em;
+  color: rgba(255,255,255,.35); margin-bottom: 2.5rem;
+  text-transform: uppercase;
+}
+.hero-logo span {
+  display: inline-block; width: 8px; height: 8px;
+  background: var(--glow); border-radius: 50%; margin: 0 .4rem;
+  box-shadow: 0 0 10px var(--glow); vertical-align: middle;
+}
+</style>
+</head>
+<body>
+
+<div id="vignette"></div>
+<div id="scanlines"></div>
+<div id="particles"></div>
+
+<!-- Nav -->
+<nav id="nav">
+  <div class="nav-logo">AMA<span>TEL</span></div>
+  <ul class="nav-links">
+    <li><a href="#">Soluções</a></li>
+    <li><a href="#">Produtos</a></li>
+    <li><a href="#">Marcas</a></li>
+    <li><a href="#">Contato</a></li>
+  </ul>
+  <a href="tel:+551321025555" class="nav-cta">(13) 2102-5555</a>
+</nav>
+
+<!-- Progress -->
+<div id="progress">
+  <div class="pdot active" data-i="0"></div>
+  <div class="pdot" data-i="1"></div>
+  <div class="pdot" data-i="2"></div>
+  <div class="pdot" data-i="3"></div>
+  <div class="pdot" data-i="4"></div>
+</div>
+
+<!-- ── Scene 0 · Hero ─────────────────────────── -->
+<section class="scene" id="s0">
+  <div class="inner">
+    <div class="bg bg-0"></div>
+    <div class="content">
+      <div class="hero-logo">AMATEL <span></span></div>
+      <p class="eyebrow">Distribuidor de Tecnologia</p>
+      <h1>Conecta e<br><span class="accent">Transforma</span></h1>
+      <p class="subtitle">Soluções tecnológicas inteligentes para impulsionar o futuro do seu negócio. Mais de 60 marcas, 10 categorias de produtos.</p>
+      <button class="btn" id="start-btn">Descubra as soluções &nbsp;→</button>
+    </div>
+    <div class="scroll-hint">Role para explorar</div>
+  </div>
+</section>
+
+<!-- ── Scene 1 · Quem somos ───────────────────── -->
+<section class="scene" id="s1">
+  <div class="inner">
+    <div class="bg bg-1"></div>
+    <div class="content">
+      <p class="eyebrow">Quem Somos</p>
+      <h2>Mais de <span class="accent">20 anos</span><br>conectando tecnologia</h2>
+      <p class="subtitle">Com sede em Santos-SP e filiais em todo o Brasil e Portugal, somos o elo entre as melhores marcas do mundo e o seu negócio.</p>
+      <div class="stats">
+        <div>
+          <div class="stat-n">60+</div>
+          <div class="stat-l">Marcas</div>
+        </div>
+        <div>
+          <div class="stat-n">10</div>
+          <div class="stat-l">Categorias</div>
+        </div>
+        <div>
+          <div class="stat-n">5</div>
+          <div class="stat-l">Filiais</div>
+        </div>
+        <div>
+          <div class="stat-n">BR+PT</div>
+          <div class="stat-l">Atuação</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Scene 2 · Produtos ─────────────────────── -->
+<section class="scene" id="s2">
+  <div class="inner">
+    <div class="bg bg-2"></div>
+    <div class="content">
+      <p class="eyebrow">Categorias de Produtos</p>
+      <h2>Tudo que seu<br>negócio <span class="accent">precisa</span></h2>
+      <div class="products">
+        <div class="pcard"><span class="pcard-icon">❄️</span><div class="pcard-name">Ar Condicionado</div></div>
+        <div class="pcard"><span class="pcard-icon">🏠</span><div class="pcard-name">Automação Residencial</div></div>
+        <div class="pcard"><span class="pcard-icon">📡</span><div class="pcard-name">Comunicações</div></div>
+        <div class="pcard"><span class="pcard-icon">🔐</span><div class="pcard-name">Controle de Acesso</div></div>
+        <div class="pcard"><span class="pcard-icon">⚡</span><div class="pcard-name">Elétrica</div></div>
+        <div class="pcard"><span class="pcard-icon">☀️</span><div class="pcard-name">Energia Solar</div></div>
+        <div class="pcard"><span class="pcard-icon">💻</span><div class="pcard-name">Informática</div></div>
+        <div class="pcard"><span class="pcard-icon">📹</span><div class="pcard-name">Segurança Eletrônica</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Scene 3 · Marcas ───────────────────────── -->
+<section class="scene" id="s3">
+  <div class="inner">
+    <div class="bg bg-3"></div>
+    <div class="content">
+      <p class="eyebrow">Portfólio de Marcas</p>
+      <h2>As melhores marcas<br><span class="accent">do mercado</span></h2>
+      <p class="subtitle">Distribuidores autorizados de mais de 60 marcas líderes mundiais em tecnologia.</p>
+      <div class="brands">
+        <span class="btag">Intelbras</span>
+        <span class="btag">Furukawa</span>
+        <span class="btag">Elgin</span>
+        <span class="btag">Multilaser</span>
+        <span class="btag">Legrand</span>
+        <span class="btag">Intel</span>
+        <span class="btag">Gigabyte</span>
+        <span class="btag">JBL</span>
+        <span class="btag">Logitech</span>
+        <span class="btag">Corsair</span>
+        <span class="btag">Razer</span>
+        <span class="btag">D-Link</span>
+        <span class="btag">TP-Link</span>
+        <span class="btag">Samsung</span>
+        <span class="btag">LG</span>
+        <span class="btag">+ 45 marcas</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Scene 4 · CTA ──────────────────────────── -->
+<section class="scene" id="s4">
+  <div class="inner">
+    <div class="bg bg-4"></div>
+    <div class="content">
+      <p class="eyebrow">Seja um Revendedor</p>
+      <h2>Pronto para <span class="accent">transformar</span><br>seu negócio?</h2>
+      <p class="subtitle">Entre em contato e descubra como se tornar um revendedor autorizado Amatel. Nossa equipe está pronta para te atender.</p>
+      <div class="btn-row">
+        <a href="tel:+551321025555" class="btn">📞 &nbsp;(13) 2102-5555</a>
+        <a href="https://www.amatel.com.br" class="btn btn-ghost" target="_blank">Acessar o site &nbsp;↗</a>
+      </div>
+      <div class="locations">
+        Santos, SP &nbsp;·&nbsp; Itanhaém, SP &nbsp;·&nbsp; Varginha, MG &nbsp;·&nbsp; Salvador, BA &nbsp;·&nbsp; Malveira, PT
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const scenes  = document.querySelectorAll('.scene');
+const dots    = document.querySelectorAll('.pdot');
+const LAST    = scenes.length - 1;
+
+// ── 3D scroll animation per scene ───────────────
+scenes.forEach((scene, i) => {
+  const inner = scene.querySelector('.inner');
+
+  if (i === LAST) {
+    // Last scene: only zoom-in, stay
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: scene,
+        start: 'top top',
+        end: '+=120%',
+        pin: true,
+        scrub: 1.2,
+      }
+    })
+    .fromTo(inner,
+      { scale: 0.25, opacity: 0, filter: 'blur(25px)' },
+      { scale: 1,    opacity: 1, filter: 'blur(0px)',  ease: 'power2.out', duration: 1 }
+    );
+    return;
+  }
+
+  // All other scenes: zoom-in → fly-through
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: scene,
+      start: 'top top',
+      end: '+=220%',
+      pin: true,
+      scrub: 1.2,
+      onUpdate (self) {
+        // Update progress dot
+        if (self.progress > 0.45 && self.progress < 0.55) {
+          dots.forEach(d => d.classList.remove('active'));
+          // active dot = next scene
+        }
+      }
+    }
+  });
+
+  // Phase 1 – approach (scale up from tiny)
+  tl.fromTo(inner,
+    { scale: 0.25, opacity: 0, filter: 'blur(25px)' },
+    { scale: 1,    opacity: 1, filter: 'blur(0px)',  duration: 1, ease: 'power2.out' }
+  );
+
+  // Phase 2 – fly past (scale past 1, blur & fade out)
+  tl.to(inner,
+    { scale: 2.2, opacity: 0, filter: 'blur(18px)', duration: 1, ease: 'power2.in' }
+  );
+});
+
+// ── Progress dots via ScrollTrigger ─────────────
+scenes.forEach((scene, i) => {
+  ScrollTrigger.create({
+    trigger: scene,
+    start: 'top center',
+    end: 'bottom center',
+    onEnter      () { setDot(i); },
+    onEnterBack  () { setDot(i); },
+  });
+});
+
+function setDot(i) {
+  dots.forEach(d => d.classList.remove('active'));
+  dots[i]?.classList.add('active');
+}
+
+// Dot click → scroll to scene
+dots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    scenes[+dot.dataset.i].scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// Start button
+document.getElementById('start-btn').addEventListener('click', () => {
+  scenes[1].scrollIntoView({ behavior: 'smooth' });
+});
+
+// ── Floating particles ───────────────────────────
+const pc = document.getElementById('particles');
+function spawnParticle() {
+  const el = document.createElement('div');
+  el.className = 'pt';
+  const s = Math.random() * 2.5 + .5;
+  el.style.cssText = `
+    width:${s}px; height:${s}px;
+    left:${Math.random()*100}vw;
+    bottom:${-s}px;
+    animation-duration:${6 + Math.random()*10}s;
+    animation-delay:${Math.random()*4}s;
+    opacity:0;
+  `;
+  pc.appendChild(el);
+  setTimeout(() => el.remove(), 20000);
+}
+setInterval(spawnParticle, 300);
+for (let i = 0; i < 25; i++) spawnParticle();
+</script>
+</body>
+</html>
