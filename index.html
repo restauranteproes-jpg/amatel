@@ -6,322 +6,261 @@
 <title>Amatel — Conecta e Transforma</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
-  --blue-deep:   #020b18;
-  --blue-dark:   #0a1628;
-  --blue-mid:    #0d3a6e;
-  --blue:        #0077ff;
-  --glow:        #00aaff;
-  --white:       #ffffff;
-  --muted:       rgba(255,255,255,.6);
+  --blue:   #0077ff;
+  --glow:   #00aaff;
+  --deep:   #020b18;
+  --muted:  rgba(255,255,255,.6);
 }
 
-html { scroll-behavior: auto; }
+html, body { width:100%; background:#000; font-family:'Inter',sans-serif; overflow-x:hidden; }
 
-body {
-  background: var(--blue-deep);
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
-}
-
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 2px; }
-
-/* ── Fixed overlays ───────────────────────────── */
+/* ─── FIXED UI ─────────────────────────────────── */
 #vignette {
-  position: fixed; inset: 0; pointer-events: none; z-index: 50;
-  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.75) 100%);
+  position:fixed; inset:0; pointer-events:none; z-index:60;
+  background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.8) 100%);
 }
 
-#scanlines {
-  position: fixed; inset: 0; pointer-events: none; z-index: 49;
-  background: repeating-linear-gradient(0deg,
-    transparent, transparent 2px,
-    rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 4px);
-}
-
-/* ── Nav ──────────────────────────────────────── */
 #nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 1.4rem 3rem;
-  display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(2,11,24,.9) 0%, transparent 100%);
-  backdrop-filter: blur(0px);
+  position:fixed; top:0; left:0; right:0; z-index:80;
+  padding:1.3rem 3rem;
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(0,0,0,.75),transparent);
 }
-.nav-logo {
-  font-size: 1.5rem; font-weight: 900; color: #fff;
-  letter-spacing: .12em;
-}
-.nav-logo span { color: var(--glow); }
-.nav-links { display: flex; gap: 2rem; list-style: none; }
-.nav-links a {
-  color: var(--muted); text-decoration: none;
-  font-size: .875rem; font-weight: 500;
-  transition: color .2s;
-}
-.nav-links a:hover { color: #fff; }
+.nav-logo { font-size:1.45rem; font-weight:900; color:#fff; letter-spacing:.12em; }
+.nav-logo em { color:var(--glow); font-style:normal; }
+.nav-links { display:flex; gap:2rem; list-style:none; }
+.nav-links a { color:var(--muted); text-decoration:none; font-size:.875rem; font-weight:500; transition:color .2s; }
+.nav-links a:hover { color:#fff; }
 .nav-cta {
-  padding: .55rem 1.4rem;
-  background: rgba(0,119,255,.15);
-  border: 1px solid rgba(0,119,255,.5);
-  color: var(--glow);
-  border-radius: 50px; font-size: .85rem; font-weight: 600;
-  text-decoration: none; transition: all .3s;
+  padding:.55rem 1.4rem; border-radius:50px;
+  background:rgba(0,119,255,.15); border:1px solid rgba(0,119,255,.5);
+  color:var(--glow); font-size:.85rem; font-weight:600;
+  text-decoration:none; transition:all .3s;
 }
-.nav-cta:hover {
-  background: var(--blue); color: #fff;
-  box-shadow: 0 0 20px rgba(0,119,255,.5);
-}
+.nav-cta:hover { background:var(--blue); color:#fff; box-shadow:0 0 20px rgba(0,119,255,.5); }
 
-/* ── Progress dots ────────────────────────────── */
 #progress {
-  position: fixed; right: 1.75rem; top: 50%;
-  transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: .7rem; z-index: 100;
+  position:fixed; right:1.6rem; top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:.65rem; z-index:80;
 }
 .pdot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: rgba(255,255,255,.15);
-  border: 1px solid rgba(255,255,255,.25);
-  cursor: pointer;
-  transition: all .35s;
+  width:7px; height:7px; border-radius:50%;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);
+  cursor:pointer; transition:all .35s;
 }
 .pdot.active {
-  background: var(--glow);
-  border-color: var(--glow);
-  box-shadow: 0 0 10px var(--glow);
-  transform: scale(1.5);
+  background:var(--glow); border-color:var(--glow);
+  box-shadow:0 0 10px var(--glow); transform:scale(1.5);
 }
 
-/* ── Scene ────────────────────────────────────── */
+/* ─── SCENE STRUCTURE ──────────────────────────── */
 .scene {
-  position: relative;
-  width: 100vw; height: 100vh;
-  overflow: hidden;
+  position:relative;
+  width:100vw; height:100vh;
+  overflow:hidden;
 }
 
+/* The full-bleed photo/background layer */
+.photo {
+  position:absolute; inset:0; z-index:0;
+  background-size:cover; background-position:center;
+  will-change:transform;
+}
+
+/* Dark overlay so text is always readable */
+.overlay {
+  position:absolute; inset:0; z-index:1;
+  background:rgba(0,0,0,.52);
+}
+
+/* Content wrapper that GSAP animates */
 .inner {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  transform-origin: center center;
-  will-change: transform, opacity, filter;
+  position:absolute; inset:0; z-index:2;
+  display:flex; align-items:center; justify-content:center;
+  transform-origin:center center;
+  will-change:transform,opacity,clip-path,filter;
 }
 
-.bg {
-  position: absolute; inset: 0; z-index: 0;
+/* ─── PHOTO BACKGROUNDS ─────────────────────────
+   Troque as URLs abaixo pelas fotos reais da Amatel:
+   - p1: fachada / rua
+   - p2: entrada / recepção
+   - p3: depósito / prateleiras
+   - p4: produtos em destaque
+   - p5: equipe / escritório
+──────────────────────────────────────────────── */
+.p1 { background-image:
+  linear-gradient(160deg,#0a1f3a 0%,#020b18 50%,#030d20 100%);
 }
-.bg-0 { background: radial-gradient(ellipse at 50% 60%, #0d3a6e 0%, #020b18 65%); }
-.bg-1 { background: radial-gradient(ellipse at 35% 50%, #082040 0%, #020b18 65%); }
-.bg-2 { background: radial-gradient(ellipse at 65% 50%, #061a30 0%, #010810 65%); }
-.bg-3 { background: radial-gradient(ellipse at 50% 40%, #0b2a4a 0%, #020b18 65%); }
-.bg-4 { background: radial-gradient(ellipse at 50% 60%, #0050bb 0%, #020b18 65%); }
+.p2 { background-image:
+  linear-gradient(170deg,#071525 0%,#0a2040 40%,#020c1a 100%);
+}
+.p3 { background-image:
+  linear-gradient(180deg,#020b18 0%,#071a30 35%,#020b18 100%);
+}
+.p4 { background-image:
+  linear-gradient(150deg,#030f22 0%,#082040 50%,#020b18 100%);
+}
+.p5 { background-image:
+  linear-gradient(180deg,#0055bb 0%,#020b18 60%);
+}
 
-/* grid overlay on bg */
-.bg::after {
-  content: '';
-  position: absolute; inset: 0;
+/* Grid floor lines – creates depth illusion */
+.photo::after {
+  content:'';
+  position:absolute; inset:0;
   background-image:
-    linear-gradient(rgba(0,119,255,.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,119,255,.07) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    linear-gradient(rgba(0,119,255,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,119,255,.06) 1px,transparent 1px);
+  background-size:80px 80px;
+  perspective:600px;
+  transform:rotateX(60deg) translateY(60%) scaleX(1.5);
+  transform-origin:bottom center;
+  opacity:.6;
 }
 
-.content {
-  position: relative; z-index: 1;
-  text-align: center; padding: 2rem;
-  max-width: 960px; width: 100%;
+/* Doorway frame – visible on approach */
+.door-frame {
+  position:absolute; inset:0; z-index:3; pointer-events:none;
+  box-shadow:inset 0 0 0 0px rgba(0,119,255,0);
+  border:0px solid rgba(0,119,255,0);
+  transition:none;
 }
 
-/* ── Typography ───────────────────────────────── */
-.eyebrow {
-  display: inline-block;
-  font-size: .7rem; font-weight: 600;
-  letter-spacing: .28em; text-transform: uppercase;
-  color: var(--glow); opacity: .85;
-  margin-bottom: 1.1rem;
+/* ─── CONTENT STYLES ──────────────────────────── */
+.content { text-align:center; padding:2rem; max-width:920px; width:100%; }
+
+.floor-label {
+  font-size:.68rem; font-weight:600; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--glow); opacity:.75;
+  margin-bottom:1rem; display:flex; align-items:center;
+  justify-content:center; gap:.6rem;
 }
+.floor-label::before, .floor-label::after {
+  content:''; flex:1; max-width:60px; height:1px;
+  background:linear-gradient(to right,transparent,var(--glow));
+}
+.floor-label::after { transform:rotate(180deg); }
 
 h1 {
-  font-size: clamp(3.2rem, 8vw, 7rem);
-  font-weight: 900; line-height: 1; letter-spacing: -.025em;
-  color: #fff; margin-bottom: 1.4rem;
-  text-shadow: 0 0 80px rgba(0,119,255,.4);
+  font-size:clamp(3rem,8vw,6.5rem); font-weight:900;
+  line-height:1; letter-spacing:-.025em; color:#fff;
+  text-shadow:0 0 80px rgba(0,119,255,.5);
+  margin-bottom:1.3rem;
 }
-
 h2 {
-  font-size: clamp(2rem, 5vw, 4rem);
-  font-weight: 800; line-height: 1.1; letter-spacing: -.02em;
-  color: #fff; margin-bottom: 1.4rem;
+  font-size:clamp(2rem,5vw,4rem); font-weight:800;
+  line-height:1.1; letter-spacing:-.02em; color:#fff;
+  margin-bottom:1.3rem;
+}
+.accent { color:var(--glow); }
+.sub {
+  font-size:clamp(.9rem,1.8vw,1.15rem); color:var(--muted);
+  font-weight:300; line-height:1.65; max-width:560px;
+  margin:0 auto 2.2rem;
 }
 
-.accent { color: var(--glow); }
-
-.subtitle {
-  font-size: clamp(.95rem, 1.8vw, 1.2rem);
-  color: var(--muted); font-weight: 300; line-height: 1.65;
-  max-width: 560px; margin: 0 auto 2.2rem;
+/* Address tag */
+.address-tag {
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.5rem 1.2rem; border-radius:50px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.55); font-size:.8rem; letter-spacing:.04em;
+  margin-bottom:2rem;
 }
 
-/* ── Buttons ──────────────────────────────────── */
+/* Buttons */
 .btn {
-  display: inline-flex; align-items: center; gap: .5rem;
-  padding: .9rem 2.2rem;
-  background: var(--blue); color: #fff;
-  font-size: .95rem; font-weight: 600;
-  border-radius: 50px; text-decoration: none; border: none;
-  cursor: pointer; letter-spacing: .04em;
-  box-shadow: 0 0 30px rgba(0,119,255,.45);
-  transition: all .3s;
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.9rem 2.2rem; border-radius:50px;
+  background:var(--blue); color:#fff;
+  font-size:.95rem; font-weight:600; border:none;
+  text-decoration:none; cursor:pointer; letter-spacing:.04em;
+  box-shadow:0 0 30px rgba(0,119,255,.45); transition:all .3s;
 }
-.btn:hover {
-  transform: scale(1.06);
-  box-shadow: 0 0 50px rgba(0,119,255,.65);
-}
+.btn:hover { transform:scale(1.06); box-shadow:0 0 50px rgba(0,119,255,.65); }
 .btn-ghost {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.3);
-  box-shadow: none;
+  background:transparent; border:1px solid rgba(255,255,255,.3); box-shadow:none;
 }
-.btn-ghost:hover {
-  background: rgba(255,255,255,.06);
-  box-shadow: none;
-}
+.btn-ghost:hover { background:rgba(255,255,255,.07); box-shadow:none; }
+.btn-row { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
 
-/* ── Stats ────────────────────────────────────── */
-.stats {
-  display: flex; gap: 3.5rem;
-  justify-content: center; margin-top: 2.5rem;
-  flex-wrap: wrap;
-}
-.stat-n {
-  font-size: 3.2rem; font-weight: 900; line-height: 1;
-  color: var(--glow);
-}
-.stat-l {
-  font-size: .7rem; color: rgba(255,255,255,.45);
-  letter-spacing: .15em; text-transform: uppercase; margin-top: .2rem;
-}
+/* Stats */
+.stats { display:flex; gap:3.5rem; justify-content:center; margin-top:2.5rem; flex-wrap:wrap; }
+.stat-n { font-size:3.2rem; font-weight:900; color:var(--glow); line-height:1; }
+.stat-l { font-size:.68rem; color:rgba(255,255,255,.4); letter-spacing:.15em; text-transform:uppercase; margin-top:.2rem; }
 
-/* ── Product grid ─────────────────────────────── */
-.products {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: .9rem; margin-top: 2.2rem;
-}
-@media (max-width: 700px) {
-  .products { grid-template-columns: repeat(2, 1fr); }
-  .nav-links { display: none; }
-  #nav { padding: 1rem 1.4rem; }
-}
+/* Products */
+.products { display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem; margin-top:2rem; }
 .pcard {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(0,119,255,.18);
-  border-radius: 14px; padding: 1.2rem .9rem;
-  text-align: center; transition: all .3s;
+  background:rgba(255,255,255,.04); border:1px solid rgba(0,119,255,.18);
+  border-radius:14px; padding:1.1rem .8rem; text-align:center; transition:all .3s;
 }
-.pcard:hover {
-  background: rgba(0,119,255,.09);
-  border-color: rgba(0,119,255,.45);
-  transform: translateY(-5px);
-}
-.pcard-icon { font-size: 1.9rem; margin-bottom: .45rem; display: block; }
-.pcard-name {
-  font-size: .78rem; color: rgba(255,255,255,.7); font-weight: 500;
-  line-height: 1.3;
-}
+.pcard:hover { background:rgba(0,119,255,.1); border-color:rgba(0,119,255,.45); transform:translateY(-4px); }
+.pcard-icon { font-size:1.7rem; margin-bottom:.4rem; display:block; }
+.pcard-name { font-size:.76rem; color:rgba(255,255,255,.68); font-weight:500; line-height:1.3; }
 
-/* ── Brands ───────────────────────────────────── */
-.brands {
-  display: flex; flex-wrap: wrap; gap: .6rem;
-  justify-content: center; margin-top: 2rem; max-width: 780px;
-  margin-left: auto; margin-right: auto;
-}
+/* Brands */
+.brands { display:flex; flex-wrap:wrap; gap:.55rem; justify-content:center; margin-top:1.8rem; max-width:760px; margin-left:auto; margin-right:auto; }
 .btag {
-  padding: .45rem 1.1rem;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 50px;
-  font-size: .82rem; color: rgba(255,255,255,.65); font-weight: 500;
-  transition: all .3s; cursor: default;
+  padding:.42rem 1.1rem; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1); border-radius:50px;
+  font-size:.8rem; color:rgba(255,255,255,.6); font-weight:500; cursor:default; transition:all .3s;
 }
-.btag:hover {
-  background: rgba(0,119,255,.12);
-  border-color: rgba(0,119,255,.4); color: #fff;
-}
+.btag:hover { background:rgba(0,119,255,.12); border-color:rgba(0,119,255,.4); color:#fff; }
 
-/* ── CTA buttons row ──────────────────────────── */
-.btn-row {
-  display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
-}
+/* Locations */
+.locs { margin-top:2.5rem; color:rgba(255,255,255,.3); font-size:.76rem; letter-spacing:.07em; }
 
-/* ── Locations ────────────────────────────────── */
-.locations {
-  margin-top: 2.5rem;
-  color: rgba(255,255,255,.35);
-  font-size: .78rem; letter-spacing: .08em;
-}
-
-/* ── Scroll hint ──────────────────────────────── */
+/* Scroll hint */
 .scroll-hint {
-  position: absolute; bottom: 2.4rem; left: 50%;
-  transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: .4rem;
-  color: rgba(255,255,255,.3); font-size: .7rem; letter-spacing: .2em;
-  text-transform: uppercase; z-index: 2;
-  animation: bounce 2s ease-in-out infinite;
+  position:absolute; bottom:2.2rem; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:.35rem;
+  color:rgba(255,255,255,.28); font-size:.68rem; letter-spacing:.2em; text-transform:uppercase;
+  z-index:5; animation:bounce 2s ease-in-out infinite;
 }
 .scroll-hint::after {
-  content: '';
-  width: 1px; height: 36px;
-  background: linear-gradient(to bottom, rgba(0,170,255,.6), transparent);
+  content:''; width:1px; height:34px;
+  background:linear-gradient(to bottom,rgba(0,170,255,.6),transparent);
 }
 @keyframes bounce {
-  0%,100% { transform: translateX(-50%) translateY(0); opacity:.3; }
-  50%      { transform: translateX(-50%) translateY(7px); opacity:.8; }
+  0%,100% { transform:translateX(-50%) translateY(0); opacity:.28; }
+  50%      { transform:translateX(-50%) translateY(7px); opacity:.7; }
 }
 
-/* ── Particles ────────────────────────────────── */
-#particles { position: fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+/* Particles */
+#particles { position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
 .pt {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(0,170,255,.7);
-  animation: drift linear infinite;
+  position:absolute; border-radius:50%; background:rgba(0,170,255,.6);
+  animation:drift linear infinite;
 }
 @keyframes drift {
-  0%   { opacity:0; transform:translateY(0) scale(.5); }
-  10%  { opacity:.8; }
-  90%  { opacity:.4; }
+  0%   { opacity:0; transform:translateY(0) scale(.6); }
+  15%  { opacity:.7; }
+  85%  { opacity:.3; }
   100% { opacity:0; transform:translateY(-100vh) scale(.2); }
 }
 
-/* ── Section 0 logo ───────────────────────────── */
-.hero-logo {
-  font-size: 1.1rem; font-weight: 700; letter-spacing: .3em;
-  color: rgba(255,255,255,.35); margin-bottom: 2.5rem;
-  text-transform: uppercase;
-}
-.hero-logo span {
-  display: inline-block; width: 8px; height: 8px;
-  background: var(--glow); border-radius: 50%; margin: 0 .4rem;
-  box-shadow: 0 0 10px var(--glow); vertical-align: middle;
+@media(max-width:700px){
+  .nav-links,.nav-cta{ display:none; }
+  #nav{ padding:1rem 1.4rem; }
+  .products{ grid-template-columns:repeat(2,1fr); }
+  h1{ font-size:2.6rem; }
 }
 </style>
 </head>
 <body>
 
 <div id="vignette"></div>
-<div id="scanlines"></div>
 <div id="particles"></div>
 
-<!-- Nav -->
 <nav id="nav">
-  <div class="nav-logo">AMA<span>TEL</span></div>
+  <div class="nav-logo">AMA<em>TEL</em></div>
   <ul class="nav-links">
-    <li><a href="#">Soluções</a></li>
+    <li><a href="#">Sobre</a></li>
     <li><a href="#">Produtos</a></li>
     <li><a href="#">Marcas</a></li>
     <li><a href="#">Contato</a></li>
@@ -329,7 +268,6 @@ h2 {
   <a href="tel:+551321025555" class="nav-cta">(13) 2102-5555</a>
 </nav>
 
-<!-- Progress -->
 <div id="progress">
   <div class="pdot active" data-i="0"></div>
   <div class="pdot" data-i="1"></div>
@@ -338,61 +276,52 @@ h2 {
   <div class="pdot" data-i="4"></div>
 </div>
 
-<!-- ── Scene 0 · Hero ─────────────────────────── -->
+<!-- ─ SCENE 0 · Fachada / Rua ─────────────────── -->
 <section class="scene" id="s0">
+  <div class="photo p1"></div>
+  <div class="overlay"></div>
   <div class="inner">
-    <div class="bg bg-0"></div>
     <div class="content">
-      <div class="hero-logo">AMATEL <span></span></div>
-      <p class="eyebrow">Distribuidor de Tecnologia</p>
-      <h1>Conecta e<br><span class="accent">Transforma</span></h1>
-      <p class="subtitle">Soluções tecnológicas inteligentes para impulsionar o futuro do seu negócio. Mais de 60 marcas, 10 categorias de produtos.</p>
-      <button class="btn" id="start-btn">Descubra as soluções &nbsp;→</button>
+      <div class="address-tag">📍 Av. Conselheiro Nebias, 335 · Santos, SP</div>
+      <p class="floor-label">Distribuidora de Tecnologia</p>
+      <h1>Bem-vindo à<br><span class="accent">Amatel</span></h1>
+      <p class="sub">Role para entrar e conhecer nossas soluções em tecnologia, automação e segurança eletrônica.</p>
+      <button class="btn" id="start-btn">Entrar &nbsp;→</button>
     </div>
-    <div class="scroll-hint">Role para explorar</div>
+    <div class="scroll-hint">Role para entrar</div>
   </div>
 </section>
 
-<!-- ── Scene 1 · Quem somos ───────────────────── -->
+<!-- ─ SCENE 1 · Recepção ──────────────────────── -->
 <section class="scene" id="s1">
+  <div class="photo p2"></div>
+  <div class="overlay"></div>
   <div class="inner">
-    <div class="bg bg-1"></div>
     <div class="content">
-      <p class="eyebrow">Quem Somos</p>
-      <h2>Mais de <span class="accent">20 anos</span><br>conectando tecnologia</h2>
-      <p class="subtitle">Com sede em Santos-SP e filiais em todo o Brasil e Portugal, somos o elo entre as melhores marcas do mundo e o seu negócio.</p>
+      <p class="floor-label">Sobre Nós</p>
+      <h2>20 anos<br>conectando <span class="accent">tecnologia</span></h2>
+      <p class="sub">Do Brasil a Portugal, somos o elo entre as melhores marcas do mundo e o seu negócio. Cinco filiais, soluções completas.</p>
       <div class="stats">
-        <div>
-          <div class="stat-n">60+</div>
-          <div class="stat-l">Marcas</div>
-        </div>
-        <div>
-          <div class="stat-n">10</div>
-          <div class="stat-l">Categorias</div>
-        </div>
-        <div>
-          <div class="stat-n">5</div>
-          <div class="stat-l">Filiais</div>
-        </div>
-        <div>
-          <div class="stat-n">BR+PT</div>
-          <div class="stat-l">Atuação</div>
-        </div>
+        <div><div class="stat-n">60+</div><div class="stat-l">Marcas</div></div>
+        <div><div class="stat-n">10</div><div class="stat-l">Categorias</div></div>
+        <div><div class="stat-n">5</div><div class="stat-l">Filiais</div></div>
+        <div><div class="stat-n">BR+PT</div><div class="stat-l">Atuação</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Scene 2 · Produtos ─────────────────────── -->
+<!-- ─ SCENE 2 · Depósito ──────────────────────── -->
 <section class="scene" id="s2">
+  <div class="photo p3"></div>
+  <div class="overlay"></div>
   <div class="inner">
-    <div class="bg bg-2"></div>
     <div class="content">
-      <p class="eyebrow">Categorias de Produtos</p>
-      <h2>Tudo que seu<br>negócio <span class="accent">precisa</span></h2>
+      <p class="floor-label">Portfólio</p>
+      <h2>Tudo em um<br>só <span class="accent">lugar</span></h2>
       <div class="products">
         <div class="pcard"><span class="pcard-icon">❄️</span><div class="pcard-name">Ar Condicionado</div></div>
-        <div class="pcard"><span class="pcard-icon">🏠</span><div class="pcard-name">Automação Residencial</div></div>
+        <div class="pcard"><span class="pcard-icon">🏠</span><div class="pcard-name">Automação</div></div>
         <div class="pcard"><span class="pcard-icon">📡</span><div class="pcard-name">Comunicações</div></div>
         <div class="pcard"><span class="pcard-icon">🔐</span><div class="pcard-name">Controle de Acesso</div></div>
         <div class="pcard"><span class="pcard-icon">⚡</span><div class="pcard-name">Elétrica</div></div>
@@ -404,125 +333,121 @@ h2 {
   </div>
 </section>
 
-<!-- ── Scene 3 · Marcas ───────────────────────── -->
+<!-- ─ SCENE 3 · Showroom ──────────────────────── -->
 <section class="scene" id="s3">
+  <div class="photo p4"></div>
+  <div class="overlay"></div>
   <div class="inner">
-    <div class="bg bg-3"></div>
     <div class="content">
-      <p class="eyebrow">Portfólio de Marcas</p>
-      <h2>As melhores marcas<br><span class="accent">do mercado</span></h2>
-      <p class="subtitle">Distribuidores autorizados de mais de 60 marcas líderes mundiais em tecnologia.</p>
+      <p class="floor-label">Marcas Parceiras</p>
+      <h2>As melhores<br>marcas do <span class="accent">mundo</span></h2>
+      <p class="sub">Distribuidores autorizados de mais de 60 marcas líderes em tecnologia.</p>
       <div class="brands">
-        <span class="btag">Intelbras</span>
-        <span class="btag">Furukawa</span>
-        <span class="btag">Elgin</span>
-        <span class="btag">Multilaser</span>
-        <span class="btag">Legrand</span>
-        <span class="btag">Intel</span>
-        <span class="btag">Gigabyte</span>
-        <span class="btag">JBL</span>
-        <span class="btag">Logitech</span>
-        <span class="btag">Corsair</span>
-        <span class="btag">Razer</span>
-        <span class="btag">D-Link</span>
-        <span class="btag">TP-Link</span>
-        <span class="btag">Samsung</span>
-        <span class="btag">LG</span>
-        <span class="btag">+ 45 marcas</span>
+        <span class="btag">Intelbras</span><span class="btag">Furukawa</span>
+        <span class="btag">Elgin</span><span class="btag">Multilaser</span>
+        <span class="btag">Legrand</span><span class="btag">Intel</span>
+        <span class="btag">Gigabyte</span><span class="btag">JBL</span>
+        <span class="btag">Logitech</span><span class="btag">Corsair</span>
+        <span class="btag">Razer</span><span class="btag">D-Link</span>
+        <span class="btag">TP-Link</span><span class="btag">Samsung</span>
+        <span class="btag">LG</span><span class="btag">+ 45 marcas</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Scene 4 · CTA ──────────────────────────── -->
+<!-- ─ SCENE 4 · CTA ───────────────────────────── -->
 <section class="scene" id="s4">
+  <div class="photo p5"></div>
+  <div class="overlay"></div>
   <div class="inner">
-    <div class="bg bg-4"></div>
     <div class="content">
-      <p class="eyebrow">Seja um Revendedor</p>
-      <h2>Pronto para <span class="accent">transformar</span><br>seu negócio?</h2>
-      <p class="subtitle">Entre em contato e descubra como se tornar um revendedor autorizado Amatel. Nossa equipe está pronta para te atender.</p>
+      <p class="floor-label">Seja um Revendedor</p>
+      <h2>Pronto para<br><span class="accent">começar?</span></h2>
+      <p class="sub">Fale com nossa equipe e descubra como se tornar um revendedor autorizado Amatel.</p>
       <div class="btn-row">
         <a href="tel:+551321025555" class="btn">📞 &nbsp;(13) 2102-5555</a>
         <a href="https://www.amatel.com.br" class="btn btn-ghost" target="_blank">Acessar o site &nbsp;↗</a>
       </div>
-      <div class="locations">
+      <div class="locs">
         Santos, SP &nbsp;·&nbsp; Itanhaém, SP &nbsp;·&nbsp; Varginha, MG &nbsp;·&nbsp; Salvador, BA &nbsp;·&nbsp; Malveira, PT
       </div>
     </div>
   </div>
 </section>
 
-<!-- GSAP -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
-const scenes  = document.querySelectorAll('.scene');
-const dots    = document.querySelectorAll('.pdot');
-const LAST    = scenes.length - 1;
+const scenes = document.querySelectorAll('.scene');
+const dots   = document.querySelectorAll('.pdot');
+const LAST   = scenes.length - 1;
 
-// ── 3D scroll animation per scene ───────────────
 scenes.forEach((scene, i) => {
   const inner = scene.querySelector('.inner');
+  const photo = scene.querySelector('.photo');
+  const isLast = i === LAST;
 
-  if (i === LAST) {
-    // Last scene: only zoom-in, stay
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: scene,
-        start: 'top top',
-        end: '+=120%',
-        pin: true,
-        scrub: 1.2,
-      }
-    })
-    .fromTo(inner,
-      { scale: 0.25, opacity: 0, filter: 'blur(25px)' },
-      { scale: 1,    opacity: 1, filter: 'blur(0px)',  ease: 'power2.out', duration: 1 }
-    );
-    return;
-  }
+  // Doorway clip-path: starts as a small rectangle in the center (like a door opening)
+  const clipClosed = 'inset(42% 38% 42% 38% round 6px)';
+  const clipOpen   = 'inset(0% 0% 0% 0% round 0px)';
 
-  // All other scenes: zoom-in → fly-through
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: scene,
       start: 'top top',
-      end: '+=220%',
+      end: isLast ? '+=100%' : '+=220%',
       pin: true,
-      scrub: 1.2,
-      onUpdate (self) {
-        // Update progress dot
-        if (self.progress > 0.45 && self.progress < 0.55) {
-          dots.forEach(d => d.classList.remove('active'));
-          // active dot = next scene
-        }
-      }
+      scrub: 1.4,
     }
   });
 
-  // Phase 1 – approach (scale up from tiny)
+  if (i === 0) {
+    // First scene: no entrance, just slight parallax on scroll out
+    tl.to(photo, { scale: 1.12, ease: 'none', duration: 1 })
+      .to(inner,  { opacity: 0, scale: 1.08, filter: 'blur(12px)', ease: 'power2.in', duration: .6 }, '<.4');
+    return;
+  }
+
+  if (isLast) {
+    // Last scene: doorway open, stay
+    tl.fromTo(inner,
+      { clipPath: clipClosed, opacity: 0, filter: 'blur(20px)' },
+      { clipPath: clipOpen,   opacity: 1, filter: 'blur(0px)',  ease: 'power2.out', duration: 1 }
+    );
+    tl.fromTo(photo,
+      { scale: 1.3 },
+      { scale: 1.0, ease: 'power2.out', duration: 1 }, '<'
+    );
+    return;
+  }
+
+  // ── Middle scenes: enter through door, walk through ──
+  // Phase 1: door opens, you enter
   tl.fromTo(inner,
-    { scale: 0.25, opacity: 0, filter: 'blur(25px)' },
-    { scale: 1,    opacity: 1, filter: 'blur(0px)',  duration: 1, ease: 'power2.out' }
+    { clipPath: clipClosed, opacity: 0, filter: 'blur(20px)' },
+    { clipPath: clipOpen,   opacity: 1, filter: 'blur(0px)',  ease: 'power2.out', duration: 1 }
+  );
+  tl.fromTo(photo,
+    { scale: 1.3 },
+    { scale: 1.0, ease: 'power2.out', duration: 1 }, '<'
   );
 
-  // Phase 2 – fly past (scale past 1, blur & fade out)
-  tl.to(inner,
-    { scale: 2.2, opacity: 0, filter: 'blur(18px)', duration: 1, ease: 'power2.in' }
-  );
+  // Phase 2: walk further in (zoom past)
+  tl.to(inner, { scale: 1.25, opacity: 0, filter: 'blur(14px)', ease: 'power2.in', duration: 1 });
+  tl.to(photo, { scale: 1.18, ease: 'power2.in', duration: 1 }, '<');
 });
 
-// ── Progress dots via ScrollTrigger ─────────────
+// Progress dots
 scenes.forEach((scene, i) => {
   ScrollTrigger.create({
     trigger: scene,
     start: 'top center',
     end: 'bottom center',
-    onEnter      () { setDot(i); },
-    onEnterBack  () { setDot(i); },
+    onEnter()     { setDot(i); },
+    onEnterBack() { setDot(i); },
   });
 });
 
@@ -531,37 +456,28 @@ function setDot(i) {
   dots[i]?.classList.add('active');
 }
 
-// Dot click → scroll to scene
-dots.forEach(dot => {
-  dot.addEventListener('click', () => {
-    scenes[+dot.dataset.i].scrollIntoView({ behavior: 'smooth' });
-  });
+dots.forEach(d => {
+  d.addEventListener('click', () =>
+    scenes[+d.dataset.i].scrollIntoView({ behavior: 'smooth' })
+  );
 });
 
-// Start button
-document.getElementById('start-btn').addEventListener('click', () => {
-  scenes[1].scrollIntoView({ behavior: 'smooth' });
-});
+document.getElementById('start-btn').addEventListener('click', () =>
+  scenes[1].scrollIntoView({ behavior: 'smooth' })
+);
 
-// ── Floating particles ───────────────────────────
+// Particles
 const pc = document.getElementById('particles');
-function spawnParticle() {
+function pt() {
   const el = document.createElement('div');
   el.className = 'pt';
   const s = Math.random() * 2.5 + .5;
-  el.style.cssText = `
-    width:${s}px; height:${s}px;
-    left:${Math.random()*100}vw;
-    bottom:${-s}px;
-    animation-duration:${6 + Math.random()*10}s;
-    animation-delay:${Math.random()*4}s;
-    opacity:0;
-  `;
+  el.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}vw;bottom:-${s}px;animation-duration:${7+Math.random()*9}s;animation-delay:${Math.random()*4}s;opacity:0;`;
   pc.appendChild(el);
   setTimeout(() => el.remove(), 20000);
 }
-setInterval(spawnParticle, 300);
-for (let i = 0; i < 25; i++) spawnParticle();
+setInterval(pt, 280);
+for (let i = 0; i < 20; i++) pt();
 </script>
 </body>
 </html>
